@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hash Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Hash Generator</h1>
+        <div class="input-section">
+            <textarea id="inputText" placeholder="Enter text to hash..."></textarea>
+        </div>
+        <div class="output-section">
+            <div class="hash-result">
+                <label>MD5:</label>
+                <input type="text" id="md5Result" readonly>
+                <button onclick="copyToClipboard('md5Result')">Copy</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
