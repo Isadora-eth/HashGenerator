@@ -330,17 +330,138 @@ function sha1(str) {
     return temp.toLowerCase();
 }
 
+function sha256(str) {
+    function rotr(n, x) {
+        return (x >>> n) | (x << (32 - n));
+    }
+
+    function choice(x, y, z) {
+        return (x & y) ^ (~x & z);
+    }
+
+    function majority(x, y, z) {
+        return (x & y) ^ (x & z) ^ (y & z);
+    }
+
+    function sha256_Sigma0(x) {
+        return rotr(2, x) ^ rotr(13, x) ^ rotr(22, x);
+    }
+
+    function sha256_Sigma1(x) {
+        return rotr(6, x) ^ rotr(11, x) ^ rotr(25, x);
+    }
+
+    function sha256_sigma0(x) {
+        return rotr(7, x) ^ rotr(18, x) ^ (x >>> 3);
+    }
+
+    function sha256_sigma1(x) {
+        return rotr(17, x) ^ rotr(19, x) ^ (x >>> 10);
+    }
+
+    function sha256_expand(W, j) {
+        return W[j & 0x0f] += sha256_sigma1(W[(j + 14) & 0x0f]) + W[(j + 9) & 0x0f] + sha256_sigma0(W[(j + 1) & 0x0f]);
+    }
+
+    var K = [
+        0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+        0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+        0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+        0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+        0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+        0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+        0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+        0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+    ];
+
+    var H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+
+    str = str.replace(/\r\n/g, "\n");
+    var utf8 = '';
+    for (var i = 0; i < str.length; i++) {
+        var charcode = str.charCodeAt(i);
+        if (charcode < 0x80) utf8 += String.fromCharCode(charcode);
+        else if (charcode < 0x800) {
+            utf8 += String.fromCharCode(0xc0 | (charcode >> 6), 0x80 | (charcode & 0x3f));
+        }
+        else if (charcode < 0xd800 || charcode >= 0xe000) {
+            utf8 += String.fromCharCode(0xe0 | (charcode >> 12), 0x80 | ((charcode>>6) & 0x3f), 0x80 | (charcode & 0x3f));
+        }
+        else {
+            i++;
+            charcode = 0x10000 + (((charcode & 0x3ff)<<10) | (str.charCodeAt(i) & 0x3ff));
+            utf8 += String.fromCharCode(0xf0 | (charcode >>18), 0x80 | ((charcode>>12) & 0x3f), 0x80 | ((charcode>>6) & 0x3f), 0x80 | (charcode & 0x3f));
+        }
+    }
+
+    str = utf8;
+    var length = str.length;
+    var chunks = [];
+
+    str += String.fromCharCode(0x80);
+    var l = str.length / 4 + 2;
+    var N = Math.ceil(l / 16);
+    var M = new Array(N);
+
+    for (var i = 0; i < N; i++) {
+        M[i] = new Array(16);
+        for (var j = 0; j < 16; j++) {
+            M[i][j] = str.charCodeAt(i * 64 + j * 4) << 24 | str.charCodeAt(i * 64 + j * 4 + 1) << 16 | str.charCodeAt(i * 64 + j * 4 + 2) << 8 | str.charCodeAt(i * 64 + j * 4 + 3);
+        }
+    }
+
+    M[N - 1][14] = ((length - 1) * 8) / Math.pow(2, 32);
+    M[N - 1][14] = Math.floor(M[N - 1][14]);
+    M[N - 1][15] = ((length - 1) * 8) & 0xffffffff;
+
+    for (var i = 0; i < N; i++) {
+        var W = new Array(64);
+
+        for (var t = 0; t < 16; t++) W[t] = M[i][t];
+        for (var t = 16; t < 64; t++) W[t] = (sha256_sigma1(W[t - 2]) + W[t - 7] + sha256_sigma0(W[t - 15]) + W[t - 16]) & 0xffffffff;
+
+        var a = H[0]; var b = H[1]; var c = H[2]; var d = H[3]; var e = H[4]; var f = H[5]; var g = H[6]; var h = H[7];
+
+        for (var t = 0; t < 64; t++) {
+            var T1 = h + sha256_Sigma1(e) + choice(e, f, g) + K[t] + W[t];
+            var T2 = sha256_Sigma0(a) + majority(a, b, c);
+            h = g;
+            g = f;
+            f = e;
+            e = (d + T1) & 0xffffffff;
+            d = c;
+            c = b;
+            b = a;
+            a = (T1 + T2) & 0xffffffff;
+        }
+
+        H[0] = (H[0] + a) & 0xffffffff;
+        H[1] = (H[1] + b) & 0xffffffff;
+        H[2] = (H[2] + c) & 0xffffffff;
+        H[3] = (H[3] + d) & 0xffffffff;
+        H[4] = (H[4] + e) & 0xffffffff;
+        H[5] = (H[5] + f) & 0xffffffff;
+        H[6] = (H[6] + g) & 0xffffffff;
+        H[7] = (H[7] + h) & 0xffffffff;
+    }
+
+    return H.map(function(h) { return ("00000000" + h.toString(16)).slice(-8); }).join('');
+}
+
 function updateHashes() {
     const input = document.getElementById('inputText').value;
     const md5Result = document.getElementById('md5Result');
     const sha1Result = document.getElementById('sha1Result');
+    const sha256Result = document.getElementById('sha256Result');
     
     if (input) {
         md5Result.value = md5(input);
         sha1Result.value = sha1(input);
+        sha256Result.value = sha256(input);
     } else {
         md5Result.value = '';
         sha1Result.value = '';
+        sha256Result.value = '';
     }
 }
 
