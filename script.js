@@ -471,4 +471,9 @@ function copyToClipboard(elementId) {
     document.execCommand('copy');
 }
 
+function clearText() {
+    document.getElementById('inputText').value = '';
+    updateHashes();
+}
+
 document.getElementById('inputText').addEventListener('input', updateHashes);
