@@ -709,4 +709,199 @@ function clearText() {
     updateHashes();
 }
 
+function switchTab(tab) {
+    const textTab = document.getElementById('textTab');
+    const fileTab = document.getElementById('fileTab');
+    const batchTab = document.getElementById('batchTab');
+    const textInput = document.getElementById('textInput');
+    const fileInput = document.getElementById('fileInput');
+    const batchInput = document.getElementById('batchInput');
+    const outputSection = document.getElementById('.output-section');
+    const batchResults = document.getElementById('batchResults');
+    
+    // Reset all tabs
+    textTab.classList.remove('active');
+    fileTab.classList.remove('active');
+    batchTab.classList.remove('active');
+    textInput.style.display = 'none';
+    fileInput.style.display = 'none';
+    batchInput.style.display = 'none';
+    
+    if (tab === 'text') {
+        textTab.classList.add('active');
+        textInput.style.display = 'block';
+        batchResults.style.display = 'none';
+        document.querySelector('.output-section').style.display = 'block';
+        updateHashes();
+    } else if (tab === 'file') {
+        fileTab.classList.add('active');
+        fileInput.style.display = 'block';
+        batchResults.style.display = 'none';
+        document.querySelector('.output-section').style.display = 'block';
+        if (document.getElementById('fileInput').files.length > 0) {
+            processFile(document.getElementById('fileInput').files[0]);
+        } else {
+            clearHashes();
+        }
+    } else if (tab === 'batch') {
+        batchTab.classList.add('active');
+        batchInput.style.display = 'block';
+        document.querySelector('.output-section').style.display = 'none';
+        if (document.getElementById('batchResultsTable').innerHTML) {
+            batchResults.style.display = 'block';
+        }
+    }
+}
+
+function handleFileSelect(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        document.getElementById('fileName').textContent = `File: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+        document.getElementById('fileUploadArea').style.display = 'none';
+        document.getElementById('fileInfo').style.display = 'block';
+        processFile(file);
+    }
+}
+
+function processFile(file) {
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert('File too large. Please select a file smaller than 5MB.');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const content = e.target.result;
+        generateFileHashes(content);
+    };
+    reader.readAsText(file);
+}
+
+function generateFileHashes(content) {
+    const md5Result = document.getElementById('md5Result');
+    const sha1Result = document.getElementById('sha1Result');
+    const sha256Result = document.getElementById('sha256Result');
+    const sha512Result = document.getElementById('sha512Result');
+    
+    md5Result.value = md5(content);
+    sha1Result.value = sha1(content);
+    sha256Result.value = sha256(content);
+    sha512Result.value = sha512(content);
+}
+
+function clearFile() {
+    document.getElementById('fileInput').value = '';
+    document.getElementById('fileUploadArea').style.display = 'block';
+    document.getElementById('fileInfo').style.display = 'none';
+    clearHashes();
+}
+
+function clearHashes() {
+    document.getElementById('md5Result').value = '';
+    document.getElementById('sha1Result').value = '';
+    document.getElementById('sha256Result').value = '';
+    document.getElementById('sha512Result').value = '';
+}
+
+// Drag and drop functionality
+document.getElementById('fileUploadArea').addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.style.borderColor = '#667eea';
+});
+
+document.getElementById('fileUploadArea').addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.style.borderColor = '#cbd5e0';
+});
+
+document.getElementById('fileUploadArea').addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.style.borderColor = '#cbd5e0';
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        document.getElementById('fileInput').files = files;
+        handleFileSelect(document.getElementById('fileInput'));
+    }
+});
+
+let batchData = [];
+
+function processBatch() {
+    const batchText = document.getElementById('batchText').value;
+    if (!batchText.trim()) {
+        alert('Please enter some text to process.');
+        return;
+    }
+    
+    const lines = batchText.split('\n').filter(line => line.trim() !== '');
+    batchData = [];
+    
+    lines.forEach((line, index) => {
+        const trimmedLine = line.trim();
+        if (trimmedLine) {
+            batchData.push({
+                index: index + 1,
+                input: trimmedLine,
+                md5: md5(trimmedLine),
+                sha1: sha1(trimmedLine),
+                sha256: sha256(trimmedLine),
+                sha512: sha512(trimmedLine)
+            });
+        }
+    });
+    
+    displayBatchResults();
+    document.getElementById('batchResults').style.display = 'block';
+}
+
+function displayBatchResults() {
+    const tableContainer = document.getElementById('batchResultsTable');
+    
+    let html = '<table class="batch-table">';
+    html += '<thead><tr><th>#</th><th>Input</th><th>MD5</th><th>SHA-1</th><th>SHA-256</th><th>SHA-512</th></tr></thead>';
+    html += '<tbody>';
+    
+    batchData.forEach(row => {
+        html += `<tr>
+            <td>${row.index}</td>
+            <td>${row.input.length > 30 ? row.input.substring(0, 30) + '...' : row.input}</td>
+            <td title="${row.md5}">${row.md5.substring(0, 16)}...</td>
+            <td title="${row.sha1}">${row.sha1.substring(0, 16)}...</td>
+            <td title="${row.sha256}">${row.sha256.substring(0, 16)}...</td>
+            <td title="${row.sha512}">${row.sha512.substring(0, 16)}...</td>
+        </tr>`;
+    });
+    
+    html += '</tbody></table>';
+    tableContainer.innerHTML = html;
+}
+
+function clearBatch() {
+    document.getElementById('batchText').value = '';
+    document.getElementById('batchResults').style.display = 'none';
+    batchData = [];
+}
+
+function exportResults() {
+    if (batchData.length === 0) {
+        alert('No data to export. Please process some text first.');
+        return;
+    }
+    
+    let csv = 'Index,Input,MD5,SHA-1,SHA-256,SHA-512\n';
+    batchData.forEach(row => {
+        csv += `${row.index},"${row.input}","${row.md5}","${row.sha1}","${row.sha256}","${row.sha512}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'hash_results.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
 document.getElementById('inputText').addEventListener('input', updateHashes);

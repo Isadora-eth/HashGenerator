@@ -10,8 +10,38 @@
     <div class="container">
         <h1>Hash Generator</h1>
         <div class="input-section">
-            <textarea id="inputText" placeholder="Enter text to hash..."></textarea>
-            <button id="clearButton" onclick="clearText()">Clear</button>
+            <div class="tab-buttons">
+                <button id="textTab" class="tab-button active" onclick="switchTab('text')">Text Input</button>
+                <button id="fileTab" class="tab-button" onclick="switchTab('file')">File Upload</button>
+                <button id="batchTab" class="tab-button" onclick="switchTab('batch')">Batch Process</button>
+            </div>
+            <div id="textInput" class="input-mode">
+                <textarea id="inputText" placeholder="Enter text to hash..."></textarea>
+                <button id="clearButton" onclick="clearText()">Clear</button>
+            </div>
+            <div id="fileInput" class="input-mode" style="display: none;">
+                <div class="file-upload-area" id="fileUploadArea">
+                    <input type="file" id="fileInput" style="display: none;" onchange="handleFileSelect(this)">
+                    <p>Drag & drop a file here or click to select</p>
+                    <button onclick="document.getElementById('fileInput').click()">Choose File</button>
+                </div>
+                <div id="fileInfo" style="display: none;">
+                    <p id="fileName"></p>
+                    <button onclick="clearFile()">Remove File</button>
+                </div>
+            </div>
+            <div id="batchInput" class="input-mode" style="display: none;">
+                <textarea id="batchText" placeholder="Enter multiple lines of text to process (one per line)..."></textarea>
+                <div class="batch-controls">
+                    <button onclick="processBatch()">Process All</button>
+                    <button onclick="clearBatch()">Clear</button>
+                    <button onclick="exportResults()">Export CSV</button>
+                </div>
+            </div>
+        </div>
+        <div id="batchResults" class="batch-results" style="display: none;">
+            <h3>Batch Processing Results</h3>
+            <div id="batchResultsTable"></div>
         </div>
         <div class="output-section">
             <div class="hash-result">
