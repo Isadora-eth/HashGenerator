@@ -25,6 +25,75 @@ h1 {
     letter-spacing: -0.5px;
 }
 
+.help-section {
+    position: relative;
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+#helpButton {
+    background: rgba(102, 126, 234, 0.1);
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #667eea;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#helpButton:hover {
+    background: rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
+}
+
+.help-content {
+    position: absolute;
+    right: 0;
+    top: 45px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+    min-width: 280px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+}
+
+.help-content h4 {
+    margin: 0 0 15px;
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.help-content ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.help-content li {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.help-content kbd {
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: bold;
+    color: #4a5568;
+    min-width: 80px;
+    text-align: center;
+}
+
 .input-section {
     margin-bottom: 30px;
     position: relative;
@@ -300,4 +369,89 @@ h1 {
 
 .hash-result button:active {
     transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 30px;
+    }
+    
+    .tab-buttons {
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .tab-button {
+        border-radius: 6px;
+        margin-bottom: 5px;
+    }
+    
+    .input-mode {
+        border-radius: 10px;
+    }
+    
+    .hash-result {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 12px;
+    }
+    
+    .hash-result label {
+        min-width: auto;
+        margin-bottom: 5px;
+    }
+    
+    .hash-result input {
+        font-size: 12px;
+        padding: 10px;
+    }
+    
+    .hash-result button {
+        align-self: center;
+        min-width: 80px;
+    }
+    
+    .batch-controls {
+        flex-direction: column;
+    }
+    
+    .batch-table {
+        font-size: 10px;
+    }
+    
+    .batch-table th,
+    .batch-table td {
+        padding: 6px 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        margin: 5px;
+        padding: 15px;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    #inputText,
+    #batchText {
+        height: 100px;
+        font-size: 14px;
+    }
+    
+    .batch-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
 }

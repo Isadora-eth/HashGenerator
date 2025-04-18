@@ -904,4 +904,62 @@ function exportResults() {
     window.URL.revokeObjectURL(url);
 }
 
+function toggleHelp() {
+    const helpContent = document.getElementById('helpContent');
+    helpContent.style.display = helpContent.style.display === 'none' ? 'block' : 'none';
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Close help with Escape
+    if (e.key === 'Escape') {
+        document.getElementById('helpContent').style.display = 'none';
+        return;
+    }
+    
+    // Only handle ctrl combinations
+    if (!e.ctrlKey) return;
+    
+    switch(e.key) {
+        case '1':
+            e.preventDefault();
+            switchTab('text');
+            break;
+        case '2':
+            e.preventDefault();
+            switchTab('file');
+            break;
+        case '3':
+            e.preventDefault();
+            switchTab('batch');
+            break;
+        case 'Enter':
+            e.preventDefault();
+            if (document.getElementById('batchTab').classList.contains('active')) {
+                processBatch();
+            }
+            break;
+        case 'k':
+        case 'K':
+            e.preventDefault();
+            const activeTab = document.querySelector('.tab-button.active').id;
+            if (activeTab === 'textTab') {
+                clearText();
+            } else if (activeTab === 'fileTab') {
+                clearFile();
+            } else if (activeTab === 'batchTab') {
+                clearBatch();
+            }
+            break;
+    }
+});
+
+// Click outside help to close
+document.addEventListener('click', function(e) {
+    const helpSection = document.querySelector('.help-section');
+    if (!helpSection.contains(e.target)) {
+        document.getElementById('helpContent').style.display = 'none';
+    }
+});
+
 document.getElementById('inputText').addEventListener('input', updateHashes);

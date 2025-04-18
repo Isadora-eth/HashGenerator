@@ -9,6 +9,20 @@
 <body>
     <div class="container">
         <h1>Hash Generator</h1>
+        <div class="help-section">
+            <button id="helpButton" onclick="toggleHelp()">?</button>
+            <div id="helpContent" class="help-content" style="display: none;">
+                <h4>Keyboard Shortcuts:</h4>
+                <ul>
+                    <li><kbd>Ctrl+1</kbd> - Switch to Text Input</li>
+                    <li><kbd>Ctrl+2</kbd> - Switch to File Upload</li>
+                    <li><kbd>Ctrl+3</kbd> - Switch to Batch Process</li>
+                    <li><kbd>Ctrl+Enter</kbd> - Process Batch (when in batch mode)</li>
+                    <li><kbd>Ctrl+K</kbd> - Clear current input</li>
+                    <li><kbd>Esc</kbd> - Close help</li>
+                </ul>
+            </div>
+        </div>
         <div class="input-section">
             <div class="tab-buttons">
                 <button id="textTab" class="tab-button active" onclick="switchTab('text')">Text Input</button>
